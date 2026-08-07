@@ -26,6 +26,19 @@ explicitly asks for implementation changes. Keep course- or project-specific
 dependency files beside the material they support, and do not change package
 managers or dependency versions without an explicit request.
 
+## Course note formatting
+
+When asked to convert, add, or reformat user-provided lesson text as a
+Markdown note, use the `format-course-note` skill.
+
+For this workflow, treat the user-supplied course directory, lesson number,
+lesson title, source text, and target filename as authoritative. An explicitly
+supplied lesson number or target filename overrides the default convention of
+following the official Udacity lesson order.
+
+Keep the detailed content-preservation, Markdown-formatting, course-index, and
+validation rules in the skill rather than duplicating them here.
+
 ## Secrets and external services
 
 Treat every `.env` file and credential as secret. Never directly inspect,
