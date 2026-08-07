@@ -6,7 +6,7 @@ workflows.
 
 ## Notes
 
-- [02. Creating a Simple LangChain Application](notes/02-creating-a-simple-langchain-application.md)
+- [01. Creating a Simple LangChain Application](notes/01-creating-a-simple-langchain-application.md)
 
 No notes for other lessons have been added yet.
 
