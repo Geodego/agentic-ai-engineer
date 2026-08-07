@@ -20,6 +20,9 @@ Directories and files use lowercase kebab-case. Courses and ordered lessons
 use two-digit prefixes such as `01-` and `02-`. Conventional names such as
 `README.md`, and Python package/import names, are not renamed to kebab-case.
 
+Lesson notes should be original summaries; do not reproduce proprietary
+Udacity course text unless redistribution is permitted.
+
 Follow each course index to see what has been added and what remains pending.
 
 ## Environment setup

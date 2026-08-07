@@ -28,10 +28,11 @@ managers or dependency versions without an explicit request.
 
 ## Secrets and external services
 
-Treat every `.env` file and credential as secret. Never display, print, stage,
-or commit `.env` contents, API keys, or other credentials. Nested `.env` files
-must remain ignored. Do not construct `.env.example` files from real secret
-files; examples may contain placeholders only.
+Treat every `.env` file and credential as secret. Never directly inspect,
+display, print, stage, or commit `.env` files or their contents. API keys and
+other credentials must also never be displayed, printed, staged, or committed.
+Nested `.env` files must remain ignored. Do not construct `.env.example` files
+from real secret files; examples may contain placeholders only.
 
 Do not run exercises, notebooks, tests, or applications that can call OpenAI,
 another paid API, or any token-consuming external service without explicit
