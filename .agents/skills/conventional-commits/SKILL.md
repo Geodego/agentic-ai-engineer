@@ -93,14 +93,27 @@ default to `chore`.
 - Ignore noise path parts such as `tests`, `test`, `__init__.py`, `conftest.py`,
   and test file stems.
 
-Use these provisional scopes until the directory structure settles:
+Use these stable repository scopes:
 
 ```text
-agents, graphs, tools, memory, retrieval, prompts, evals,
-notebooks, project_instructions, docs
+course1, course2, course3,
+project1, project2, project3,
+repo, deps, docs
 ```
 
-Course projects use their own scope, for example `project1`.
+- Use `course1`, `course2`, or `course3` for notes, exercises, and other
+  course-level material under the corresponding numbered course directory.
+- Use `project1`, `project2`, or `project3` when changes are confined to that
+  course's `project/` directory.
+- Use `repo` for repository-wide structure, agent instructions, ignores, or
+  maintenance.
+- Use `deps` for shared dependency and lock files. A dependency file contained
+  within one project may use that project's scope instead.
+- Use `docs` for root-level or cross-course documentation. Course-specific
+  documentation should use its `courseN` or `projectN` scope.
+
+Omit the scope when a staged change crosses several of these stable areas and
+no single scope accurately describes it.
 
 ## Subject
 

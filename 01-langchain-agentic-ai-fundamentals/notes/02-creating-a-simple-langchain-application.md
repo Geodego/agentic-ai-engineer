@@ -1,9 +1,9 @@
 # Creating a Simple LangChain Application
 
-## 1-Introduction to LangChain
+## 1. Introduction to LangChain
 LangChain is a framework for building applications powered by large language models (LLMs). It simplifies LLM integration, making it easier to develop AI-driven solutions like chatbots, retrieval-augmented generation (RAG) systems, document summarization tools, and autonomous agents.
 
-### 1.1-Why Use LangChain?
+### 1.1 Why Use LangChain?
 LangChain provides abstractions that connect LLMs with various tools, including:
 
 - Cloud storage services for managing data.
@@ -37,4 +37,4 @@ llm.invoke([HumanMessage(content="What’s the capital of Brazil?")])
 For convenience, LangChain automatically converts text inputs into the correct format.
 
 #### Final Thoughts
-LangChain provides a powerful and flexible foundation for LLM-based applications. Its structured approach simplifies model interactions, message handling, and system integration, allowing developers to build AI solutions efficiently. Understanding LLMs, messages, and workflows is key to making the most of LangChain’s capabilities. 
+LangChain provides a powerful and flexible foundation for LLM-based applications. Its structured approach simplifies model interactions, message handling, and system integration, allowing developers to build AI solutions efficiently. Understanding LLMs, messages, and workflows is key to making the most of LangChain’s capabilities.
