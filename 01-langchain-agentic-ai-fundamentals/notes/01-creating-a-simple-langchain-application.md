@@ -175,6 +175,8 @@ few_shot_prompt = FewShotPromptTemplate(
 llm.invoke(few_shot_prompt.invoke({"input": "If today is Wednesday, what day will it be in 10 days?"}))
 ```
 
+Each time this template is invoked, LangChain places the formatted few-shot examples before the current user question so they provide context for that request.
+
 The result shows the model following the reasoning steps provided in the examples and outputting: "Saturday."
 
 ### 2.5 Final Thoughts
