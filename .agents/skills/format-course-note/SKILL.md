@@ -24,6 +24,8 @@ Place the note in the course's `notes/` directory. When the user supplies a targ
 
 Check whether the resolved target exists before writing. If it exists, stop and request explicit permission before overwriting or restructuring it. Read the existing note first and preserve all personal annotations when applying an authorized update.
 
+When updating an existing note, preserve each existing heading's relative position, scope, and associated content unless the user explicitly requests a structural change. Do not merge an existing section with newly supplied content merely because their headings match.
+
 ## Preserve the lesson content
 
 - Preserve every item of source content and its meaning.
@@ -42,7 +44,8 @@ Check whether the resolved target exists before writing. If it exists, stop and 
 - Use `####` only for components genuinely nested beneath a `###` subsection.
 - Never skip heading levels.
 - Leave exactly one blank line after every heading before subsequent content.
-- Treat sections such as “Final Thoughts,” “Summary,” and “Conclusion” as major `##` sections unless the source clearly indicates otherwise.
+- Determine the level of sections such as “Final Thoughts,” “Summary,” and “Conclusion” from their position and scope. Use `##` only when the source presents the section as standalone major content; retain it as a subsection when it concludes a parent topic.
+- Preserve distinct same-named sections when they belong to different scopes or when one is existing content and the other is newly supplied content.
 - Convert suitable plain-text sequences into Markdown ordered or unordered lists without changing their wording or order.
 
 ## Format technical elements
@@ -59,7 +62,7 @@ Use `01-langchain-agentic-ai-fundamentals/notes/01-creating-a-simple-langchain-a
 
 - leaving a blank line after every heading;
 - formatting identifiers such as `langchain-openai`, `HumanMessage`, and `invoke()` as inline code; and
-- placing “Final Thoughts” at the major `##` level rather than beneath “Messages.”
+- preserving the original “Final Thoughts” section as a `###` subsection after “Messages,” before later major sections.
 
 Treat this file only as a structural example. Never copy its lesson content into another note.
 
