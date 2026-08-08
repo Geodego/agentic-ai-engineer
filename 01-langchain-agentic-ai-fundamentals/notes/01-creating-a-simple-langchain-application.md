@@ -81,7 +81,7 @@ messages = [
 llm.invoke(messages)
 ```
 
-## 3. Few-Shot Prompting for Better Responses
+### 2.3 Few-Shot Prompting for Better Responses
 
 By programmatically structuring chat history, developers can create examples of ideal interactions, guiding the model toward better responses.
 
@@ -92,14 +92,14 @@ This technique, called few-shot prompting, improves performance by providing exa
 
 To manage these trade-offs, LangChain provides the `FewShotPromptTemplate`, but first, understanding prompt templates is essential.
 
-## 4. Prompt Templates
+### 2.4 Prompt Templates
 
 ```python
 prompt_template = PromptTemplate(template="Tell me a joke about {topic}")
 llm.invoke(prompt_template.format(topic="Java"))
 ```
 
-### 4.1 ChatPromptTemplates
+#### 2.4.1 ChatPromptTemplates
 
 Define prompts for structured conversations.
 
@@ -112,7 +112,7 @@ template = ChatPromptTemplate([
 ])
 ```
 
-### 4.2 Few-Shot Prompt Templates
+#### 2.4.2 Few-Shot Prompt Templates
 
 Provide examples for better guidance.
 
@@ -125,6 +125,6 @@ template = FewShotPromptTemplate(
 )
 ```
 
-## 5. Final Thoughts
+### 2.5 Final Thoughts
 
 By managing chat history, structuring prompts, and leveraging few-shot learning, developers can build ChatGPT-like applications with better responses and task-specific optimizations. These tools provide the foundation for more powerful and interactive AI applications.
