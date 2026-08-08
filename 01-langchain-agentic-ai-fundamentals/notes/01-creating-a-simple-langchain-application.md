@@ -13,8 +13,9 @@
   - [2.2 Structure of a Conversation](#22-structure-of-a-conversation)
   - [2.3 Few-Shot Prompting for Better Responses](#23-few-shot-prompting-for-better-responses)
   - [2.4 Prompt Templates](#24-prompt-templates)
-    - [2.4.1 ChatPromptTemplates](#241-chatprompttemplates)
-    - [2.4.2 Few-Shot Prompt Templates](#242-few-shot-prompt-templates)
+    - [2.4.1 Basic Prompt Templates](#241-basic-prompt-templates)
+    - [2.4.2 ChatPromptTemplates](#242-chatprompttemplates)
+    - [2.4.3 Few-Shot Prompt Templates](#243-few-shot-prompt-templates)
   - [2.5 Final Thoughts](#25-final-thoughts)
 
 ## 1. Introduction to LangChain
@@ -111,12 +112,25 @@ To manage these trade-offs, LangChain provides the `FewShotPromptTemplate`, but 
 
 ### 2.4 Prompt Templates
 
+#### 2.4.1 Basic Prompt Templates
+
+Define a single-variable input prompt with a placeholder.
+
 ```python
-prompt_template = PromptTemplate(template="Tell me a joke about {topic}")
-llm.invoke(prompt_template.format(topic="Java"))
+prompt = PromptTemplate(
+    input_variables=["topic"],
+    template="Tell me a joke about {topic}"
+)
 ```
 
-#### 2.4.1 ChatPromptTemplates
+The prompt can be formatted using `.format()` or `.invoke()`:
+
+```python
+formatted_prompt = prompt.format(topic="Python")
+llm.invoke(prompt.invoke({"topic": "Python"}))
+```
+
+#### 2.4.2 ChatPromptTemplates
 
 Define prompts for structured conversations.
 
@@ -129,18 +143,39 @@ template = ChatPromptTemplate([
 ])
 ```
 
-#### 2.4.2 Few-Shot Prompt Templates
+#### 2.4.3 Few-Shot Prompt Templates
 
-Provide examples for better guidance.
+Combines multiple structured examples to guide the LLM’s reasoning.
+
+Components:
+
+- `examples`: List of example dictionaries (`input` → `thought` → `output`).
+- `example_prompt`: A `PromptTemplate` defining the format for each example.
+- `suffix`: The actual question for the current prompt.
 
 ```python
-template = FewShotPromptTemplate(
-        examples=examples,
-        example_prompt=example_prompt,
-        suffix="Question: {input}",
-        input_variables=["input"],
+examples = [
+    {"input": "A train leaves City A...", "thought": "...", "output": "2 hours"},
+    {"input": "A store applies a 20% discount...", "thought": "...", "output": "..."},
+    ...
+]
+
+example_prompt = PromptTemplate(
+    input_variables=["input", "thought", "output"],
+    template="Question: {input}\nThought: {thought}\nResponse: {output}"
 )
+
+few_shot_prompt = FewShotPromptTemplate(
+    examples=examples,
+    example_prompt=example_prompt,
+    suffix="Question: {input}",
+    input_variables=["input"]
+)
+
+llm.invoke(few_shot_prompt.invoke({"input": "If today is Wednesday, what day will it be in 10 days?"}))
 ```
+
+The result shows the model following the reasoning steps provided in the examples and outputting: "Saturday."
 
 ### 2.5 Final Thoughts
 
