@@ -1,6 +1,6 @@
 ---
 name: format-course-note
-description: Format pasted plain-text course lessons as repository Markdown note files. Use when asked to add, convert, or reformat a lesson or chapter from user-provided course content. Preserve the supplied content and do not research, summarize, or invent lesson material.
+description: Format pasted plain-text course lessons as repository Markdown note files with a maintained table of contents. Use when asked to add, convert, append, or reformat a lesson or chapter from user-provided course content. Preserve the supplied content and do not research, summarize, or invent lesson material.
 ---
 
 # Format a Course Note
@@ -53,6 +53,10 @@ Nest headings within the supplied content beneath this new `##` parent and numbe
 ## Structure the Markdown
 
 - Use exactly one `#` heading containing the supplied lesson title. When appending content, retain the existing `#` heading and do not add another one.
+- Place an unnumbered `## Table of contents` immediately after the `#` lesson title.
+- Under the table-of-contents heading, add one relative Markdown link for every subsequent heading in document order. Mirror the document hierarchy with nested list indentation, use each heading's exact visible text as the link label, and omit the `#` lesson title and the table-of-contents heading itself.
+- Generate each fragment from the target heading using GitHub-style Markdown anchors: lowercase the text, remove punctuation, replace spaces with hyphens, and preserve the heading's numeric prefix. For example, `### 2.1 Building Stateful Interactions with LLMs` links as `[2.1 Building Stateful Interactions with LLMs](#21-building-stateful-interactions-with-llms)`.
+- Rebuild the complete table of contents whenever creating a note or adding, removing, renaming, renumbering, or moving headings in an existing note. Do not append only the new entries.
 - Convert major sections to sequentially numbered `##` headings: `## 1. ...`, `## 2. ...`, and so on. For content appended to an existing note, use its required supplied section title and the next number as defined above.
 - Convert subsections to headings numbered under their parent: `### 1.1 ...`, `### 1.2 ...`, and so on.
 - Use `####` only for components genuinely nested beneath a `###` subsection.
@@ -77,7 +81,8 @@ Use `01-langchain-agentic-ai-fundamentals/notes/01-creating-a-simple-langchain-a
 - leaving a blank line after every heading;
 - formatting identifiers such as `langchain-openai`, `HumanMessage`, and `invoke()` as inline code; and
 - preserving the original “Final Thoughts” section as a `###` subsection after “Messages,” before later major sections; and
-- placing any future appended content under `## 3. <supplied-section-title>` because `## 2. Chat history and prompt templates` is currently its last numbered `##` heading.
+- placing any future appended content under `## 3. <supplied-section-title>` because `## 2. Chat history and prompt templates` is currently its last numbered `##` heading; and
+- rebuilding its table of contents so every current heading remains linked in document order.
 
 Treat this file only as a structural example. Never copy its lesson content into another note.
 
@@ -90,12 +95,13 @@ Update the relevant course `README.md` with one relative Markdown link to the no
 Before finishing:
 
 1. Verify the heading hierarchy and sequential numbering.
-2. When content was appended, verify that the user supplied its `##` section title and that its number is one greater than the last pre-existing numbered `##` heading.
-3. Verify that every heading is followed by a blank line.
-4. Verify that all code fences are closed and use appropriate language identifiers.
-5. Verify that the target path and filename match the authoritative inputs and naming rules.
-6. Verify that the course `README.md` contains one correct relative link in numeric lesson order and retains its progress text.
-7. Run `git diff --check`.
-8. Inspect `git status --short` and confirm that only intended files changed.
+2. Verify that the table of contents immediately follows the lesson title and contains one working, correctly nested link for every subsequent heading in document order.
+3. When content was appended, verify that the user supplied its `##` section title and that its number is one greater than the last pre-existing numbered `##` heading.
+4. Verify that every heading is followed by a blank line.
+5. Verify that all code fences are closed and use appropriate language identifiers.
+6. Verify that the target path and filename match the authoritative inputs and naming rules.
+7. Verify that the course `README.md` contains one correct relative link in numeric lesson order and retains its progress text.
+8. Run `git diff --check`.
+9. Inspect `git status --short` and confirm that only intended files changed.
 
 Do not stage or commit the result.

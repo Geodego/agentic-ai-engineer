@@ -1,5 +1,22 @@
 # Creating a Simple LangChain Application
 
+## Table of contents
+
+- [1. Introduction to LangChain](#1-introduction-to-langchain)
+  - [1.1 Why Use LangChain?](#11-why-use-langchain)
+  - [1.2 Core Components](#12-core-components)
+    - [Models](#models)
+    - [Messages](#messages)
+  - [1.3 Final Thoughts](#13-final-thoughts)
+- [2. Chat history and prompt templates](#2-chat-history-and-prompt-templates)
+  - [2.1 Building Stateful Interactions with LLMs](#21-building-stateful-interactions-with-llms)
+  - [2.2 Structure of a Conversation](#22-structure-of-a-conversation)
+  - [2.3 Few-Shot Prompting for Better Responses](#23-few-shot-prompting-for-better-responses)
+  - [2.4 Prompt Templates](#24-prompt-templates)
+    - [2.4.1 ChatPromptTemplates](#241-chatprompttemplates)
+    - [2.4.2 Few-Shot Prompt Templates](#242-few-shot-prompt-templates)
+  - [2.5 Final Thoughts](#25-final-thoughts)
+
 ## 1. Introduction to LangChain
 
 LangChain is a framework for building applications powered by large language models (LLMs). It simplifies LLM integration, making it easier to develop AI-driven solutions like chatbots, retrieval-augmented generation (RAG) systems, document summarization tools, and autonomous agents.
