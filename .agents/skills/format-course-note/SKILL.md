@@ -26,6 +26,20 @@ Check whether the resolved target exists before writing. If it exists, stop and 
 
 When updating an existing note, preserve each existing heading's relative position, scope, and associated content unless the user explicitly requests a structural change. Do not merge an existing section with newly supplied content merely because their headings match.
 
+## Append content to an existing note
+
+Require a user-supplied section title for every block of lesson text to append to an existing note. Treat this section title separately from the note's existing `#` lesson title. If the user does not supply the section title, stop and ask for it; do not derive or invent it from the pasted content.
+
+Place the entire new content block under one numbered `##` heading containing the supplied section title. Determine its number from the last existing numbered `##` heading in document order and add one. Use `## 1. <section-title>` when the note has no numbered `##` heading.
+
+For example, if the target note ends with `## 2. Chat history and prompt templates`, append the next supplied content block under:
+
+```markdown
+## 3. <supplied-section-title>
+```
+
+Nest headings within the supplied content beneath this new `##` parent and number them consistently. Do not merge the new block into an existing section unless the user explicitly requests that placement.
+
 ## Preserve the lesson content
 
 - Preserve every item of source content and its meaning.
@@ -38,8 +52,8 @@ When updating an existing note, preserve each existing heading's relative positi
 
 ## Structure the Markdown
 
-- Use exactly one `#` heading containing the supplied lesson title.
-- Convert major sections to sequentially numbered `##` headings: `## 1. ...`, `## 2. ...`, and so on.
+- Use exactly one `#` heading containing the supplied lesson title. When appending content, retain the existing `#` heading and do not add another one.
+- Convert major sections to sequentially numbered `##` headings: `## 1. ...`, `## 2. ...`, and so on. For content appended to an existing note, use its required supplied section title and the next number as defined above.
 - Convert subsections to headings numbered under their parent: `### 1.1 ...`, `### 1.2 ...`, and so on.
 - Use `####` only for components genuinely nested beneath a `###` subsection.
 - Never skip heading levels.
@@ -62,7 +76,8 @@ Use `01-langchain-agentic-ai-fundamentals/notes/01-creating-a-simple-langchain-a
 
 - leaving a blank line after every heading;
 - formatting identifiers such as `langchain-openai`, `HumanMessage`, and `invoke()` as inline code; and
-- preserving the original “Final Thoughts” section as a `###` subsection after “Messages,” before later major sections.
+- preserving the original “Final Thoughts” section as a `###` subsection after “Messages,” before later major sections; and
+- placing any future appended content under `## 3. <supplied-section-title>` because `## 2. Chat history and prompt templates` is currently its last numbered `##` heading.
 
 Treat this file only as a structural example. Never copy its lesson content into another note.
 
@@ -75,11 +90,12 @@ Update the relevant course `README.md` with one relative Markdown link to the no
 Before finishing:
 
 1. Verify the heading hierarchy and sequential numbering.
-2. Verify that every heading is followed by a blank line.
-3. Verify that all code fences are closed and use appropriate language identifiers.
-4. Verify that the target path and filename match the authoritative inputs and naming rules.
-5. Verify that the course `README.md` contains one correct relative link in numeric lesson order and retains its progress text.
-6. Run `git diff --check`.
-7. Inspect `git status --short` and confirm that only intended files changed.
+2. When content was appended, verify that the user supplied its `##` section title and that its number is one greater than the last pre-existing numbered `##` heading.
+3. Verify that every heading is followed by a blank line.
+4. Verify that all code fences are closed and use appropriate language identifiers.
+5. Verify that the target path and filename match the authoritative inputs and naming rules.
+6. Verify that the course `README.md` contains one correct relative link in numeric lesson order and retains its progress text.
+7. Run `git diff --check`.
+8. Inspect `git status --short` and confirm that only intended files changed.
 
 Do not stage or commit the result.
