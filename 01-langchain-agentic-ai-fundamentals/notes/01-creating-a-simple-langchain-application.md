@@ -123,12 +123,24 @@ prompt = PromptTemplate(
 )
 ```
 
-The prompt can be formatted using `.format()` or `.invoke()`:
+The prompt can be formatted in either of two ways. The `.format()` method
+returns a string, which can be passed directly to the LLM:
 
 ```python
 formatted_prompt = prompt.format(topic="Python")
-llm.invoke(prompt.invoke({"topic": "Python"}))
+response = llm.invoke(formatted_prompt)
 ```
+
+Alternatively, invoking the prompt template returns a LangChain
+`PromptValue`, which the LLM can also accept:
+
+```python
+formatted_prompt = prompt.invoke({"topic": "Python"})
+response = llm.invoke(formatted_prompt)
+```
+
+Both approaches produce the prompt "Tell me a joke about Python." Calling
+`prompt.invoke()` formats the template; it does not invoke the LLM.
 
 #### 2.4.2 ChatPromptTemplates
 
@@ -142,6 +154,23 @@ template = ChatPromptTemplate([
         ("human", "{user_input}"),
 ])
 ```
+
+The same template can be created with the `from_messages()` class method:
+
+```python
+template = ChatPromptTemplate.from_messages([
+        ("system", "You are a helpful AI bot. Your name is {name}."),
+        ("human", "Hello, how are you doing?"),
+        ("ai", "I'm doing well, thanks!"),
+        ("human", "{user_input}"),
+])
+```
+
+For this example, `ChatPromptTemplate(...)` and
+`ChatPromptTemplate.from_messages(...)` are equivalent. The first calls the
+constructor directly, while the second is a descriptive class method for
+creating a template from a sequence of messages. Neither method invokes the
+LLM.
 
 #### 2.4.3 Few-Shot Prompt Templates
 
