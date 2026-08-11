@@ -7,7 +7,8 @@
   - [1.2 Core Components](#12-core-components)
     - [Models](#models)
     - [Messages](#messages)
-  - [1.3 Final Thoughts](#13-final-thoughts)
+  - [1.3 Configuring OpenAI Credentials](#13-configuring-openai-credentials)
+  - [1.4 Final Thoughts](#14-final-thoughts)
 - [2. Chat history and prompt templates](#2-chat-history-and-prompt-templates)
   - [2.1 Building Stateful Interactions with LLMs](#21-building-stateful-interactions-with-llms)
   - [2.2 Conversation Structure and Memory](#22-conversation-structure-and-memory)
@@ -59,7 +60,54 @@ llm.invoke([HumanMessage(content="What’s the capital of Brazil?")])
 
 For convenience, LangChain automatically converts text inputs into the correct format.
 
-### 1.3 Final Thoughts
+### 1.3 Configuring OpenAI Credentials
+
+`ChatOpenAI` looks for the `OPENAI_API_KEY` environment variable. Store the
+key in a local `.env` file instead of hard-coding it in Python:
+
+```dotenv
+OPENAI_API_KEY=your-api-key
+```
+
+Load the file before creating the model:
+
+```python
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+```
+
+`load_dotenv()` adds the values from `.env` to the process environment.
+`ChatOpenAI` then reads `OPENAI_API_KEY` automatically, so the `api_key`
+argument does not need to be passed explicitly.
+
+The credential flow can also be made explicit. Wrapping the key in
+`SecretStr` helps prevent it from being exposed in object representations:
+
+```python
+import os
+
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
+
+load_dotenv()
+
+openai_api_key = SecretStr(os.environ["OPENAI_API_KEY"])
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    api_key=openai_api_key,
+)
+```
+
+Both approaches use the same environment variable. Never hard-code or commit
+an API key, and keep `.env` ignored by Git. The explicit approach is also used
+in the [chatbot application exercise](../exercises/01-chatbot-application.ipynb).
+
+### 1.4 Final Thoughts
 
 LangChain provides a powerful and flexible foundation for LLM-based applications. Its structured approach simplifies model interactions, message handling, and system integration, allowing developers to build AI solutions efficiently. Understanding LLMs, messages, and workflows is key to making the most of LangChain’s capabilities.
 
