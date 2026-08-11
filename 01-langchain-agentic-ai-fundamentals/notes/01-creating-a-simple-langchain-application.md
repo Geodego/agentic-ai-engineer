@@ -10,7 +10,7 @@
   - [1.3 Final Thoughts](#13-final-thoughts)
 - [2. Chat history and prompt templates](#2-chat-history-and-prompt-templates)
   - [2.1 Building Stateful Interactions with LLMs](#21-building-stateful-interactions-with-llms)
-  - [2.2 Structure of a Conversation](#22-structure-of-a-conversation)
+  - [2.2 Conversation Structure and Memory](#22-conversation-structure-and-memory)
   - [2.3 Few-Shot Prompting for Better Responses](#23-few-shot-prompting-for-better-responses)
   - [2.4 Prompt Templates](#24-prompt-templates)
     - [2.4.1 Basic Prompt Templates](#241-basic-prompt-templates)
@@ -69,35 +69,42 @@ LangChain provides a powerful and flexible foundation for LLM-based applications
 
 LLMs are stateless, meaning they do not remember previous interactions unless past messages are explicitly provided. To build cohesive conversations, applications must manage chat history and supply relevant context with each request.
 
-### 2.2 Structure of a Conversation
+### 2.2 Conversation Structure and Memory
 
-A conversation typically consists of three key message types:
+A conversation history is represented as an ordered list of message objects.
 
-- `SystemMessage` – Sets the context for the interaction.
+The main message types are:
 
-  ```python
-  SystemMessage("You are a geography tutor")
-  ```
-
+- `SystemMessage` – Defines the model's role or behavior.
 - `HumanMessage` – Represents user input.
-
-  ```python
-  HumanMessage("What's the capital of Brazil?")
-  ```
-
-- `AIMessage` – Represents the model’s response.
-- `ToolMessage` – Requests a tool invocation (for agent-based workflows).
-
-A conversation is structured as a list of messages, which is then passed to the model.
+- `AIMessage` – Represents a model response.
+- `ToolMessage` – Contains the result of a tool call in agent-based workflows.
 
 ```python
 messages = [
-        SystemMessage("You are a geography tutor"),
-        HumanMessage("What's the capital of Brazil?")
+    SystemMessage(content="You are a geography tutor"),
+    HumanMessage(content="What's the capital of Brazil?"),
 ]
 
-llm.invoke(messages)
+# Generate and store the first response
+ai_message = llm.invoke(messages)
+messages.append(ai_message)
+
+# Add a new user message to the same history
+messages.append(
+    HumanMessage(content="What is it known for?")
+)
+
+# The model receives the complete conversation
+ai_message = llm.invoke(messages)
+messages.append(ai_message)
 ```
+
+Because the complete `messages` list is passed to the model again, it can use
+the earlier exchange to understand that “it” refers to Brazil’s capital. After
+the second response, the list contains the system instruction and both
+human–AI turns. This history exists only while the application retains the
+list; it is not persistent storage.
 
 ### 2.3 Few-Shot Prompting for Better Responses
 
