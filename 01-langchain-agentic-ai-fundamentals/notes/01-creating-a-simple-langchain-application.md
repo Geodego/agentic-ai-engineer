@@ -180,7 +180,13 @@ Components:
 
 - `examples`: List of example dictionaries (`input` → `thought` → `output`).
 - `example_prompt`: A `PromptTemplate` defining the format for each example.
-- `suffix`: The actual question for the current prompt.
+- `suffix`: A template appended after the formatted examples, typically
+  containing the current question.
+
+The `suffix` defines what appears at the end of the complete prompt. Its
+`{input}` placeholder is replaced with the value supplied to
+`few_shot_prompt.invoke()`. This places the examples first and the new question
+last, where the model can respond to it using the examples as guidance.
 
 ```python
 examples = [
@@ -201,10 +207,18 @@ few_shot_prompt = FewShotPromptTemplate(
     input_variables=["input"]
 )
 
-llm.invoke(few_shot_prompt.invoke({"input": "If today is Wednesday, what day will it be in 10 days?"}))
+formatted_prompt = few_shot_prompt.invoke({
+    "input": "If today is Wednesday, what day will it be in 10 days?"
+})
+
+response = llm.invoke(formatted_prompt)
 ```
 
-Each time this template is invoked, LangChain places the formatted few-shot examples before the current user question so they provide context for that request.
+The call to `few_shot_prompt.invoke()` formats a complete prompt by placing the
+few-shot examples before the current user question. It does not call the LLM.
+The call to `llm.invoke()` then sends that complete prompt to the model, so the
+examples can guide its response. Calling `llm.invoke()` directly with only the
+question would omit the few-shot examples.
 
 The result shows the model following the reasoning steps provided in the examples and outputting: "Saturday."
 
