@@ -118,6 +118,28 @@ class UserInfo(TypedDict):
   country: str
 ```
 
+When LangChain converts a `TypedDict` into a structured-output schema, it can
+also read field metadata stored with `Annotated`:
+
+```python
+from typing_extensions import Annotated, TypedDict
+
+class UserInfo(TypedDict):
+  name: Annotated[str, "", "User's name. Defaults to ''"]
+  country: Annotated[str, "", "Where the user lives. Defaults to ''"]
+```
+
+For this LangChain conversion, the values are interpreted positionally as:
+
+```python
+Annotated[field_type, default_value, description]
+```
+
+This interpretation is specific to LangChain's conversion of `TypedDict`
+structured-output schemas. Python's `Annotated` type only attaches arbitrary
+metadata to the underlying type; it does not define what that metadata means.
+Other libraries may interpret or ignore the metadata differently.
+
 Using `with_structured_output(UserInfo)`, the model is guided to format its response accordingly.
 
 Examples:
