@@ -6,6 +6,7 @@
   - [1.1 The Evolution from Chains to Runnables in LangChain](#11-the-evolution-from-chains-to-runnables-in-langchain)
   - [1.2 Runnables: The New Standard](#12-runnables-the-new-standard)
     - [1.2.1 What Can Runnables Do?](#121-what-can-runnables-do)
+    - [1.2.2 Common Runnable Input and Output Types](#122-common-runnable-input-and-output-types)
   - [1.3 LCEL: The Declarative Approach to Chains](#13-lcel-the-declarative-approach-to-chains)
   - [1.4 Final Thoughts](#14-final-thoughts)
 
@@ -42,6 +43,17 @@ some_runnable.invoke(
         }
 )
 ```
+
+#### 1.2.2 Common Runnable Input and Output Types
+
+| Component | Input Type | Output Type |
+| --- | --- | --- |
+| `Prompt` | Dictionary | `PromptValue` |
+| `ChatModel` | Single string, list of chat messages or a `PromptValue` | `ChatMessage` |
+| `LLM` | Single string, list of chat messages or a `PromptValue` | String |
+| `OutputParser` | The output of an `LLM` or `ChatModel` | Depends on the parser |
+| `Retriever` | Single string | List of Documents |
+| `Tool` | Single string or dictionary, depending on the tool | Depends on the tool |
 
 ### 1.3 LCEL: The Declarative Approach to Chains
 
