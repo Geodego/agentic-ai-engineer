@@ -43,7 +43,11 @@ A common early method was to prompt the model to output JSON, such as: “Return
 
 To improve reliability, output parsers can validate whether the model's response conforms to a defined schema. If valid, the output is parsed; if not, fallback strategies can be applied.
 
-Function calling provides an even more robust solution. Here, the model is given a JSON schema and asked to call a specific function. The model must output a structured function call object that matches the schema. This guarantees correct format and types, turning the model into something more predictable and usable in software systems.
+Function calling provides a more robust solution. Here, the model is given a
+JSON schema and asked to call a specific function. This strongly constrains the
+shape and types of the response, making the model more predictable and useful
+in software systems. The application should still validate the result because
+schema compliance does not guarantee that field values are factually correct.
 
 ### 1.4 Modeling Complex Data with Pydantic
 
@@ -57,7 +61,9 @@ class ActionItem(BaseModel):
   status: Literal["open", "closed"]
 ```
 
-This ensures that agents generate only valid outputs. If the model's response fails validation, the system can retry, rephrase the request, or handle the error safely.
+This lets an application validate the generated output before using it. If the
+model's response fails validation, the system can retry, rephrase the request,
+or handle the error safely.
 
 ### 1.5 Designing for Reliability
 
@@ -67,66 +73,96 @@ Structured outputs are foundational for agents that do more than talk. They enab
 
 ## 2. Structured Output Parsing with LangChain
 
-### 2.1 Basic String Parsing
-
-By default, calling `.invoke()` on an LLM returns an `AIMessage` object.
-To extract the raw text, access `ai_message.content`.
+The exercise uses a temperature-zero chat model configuration so that repeated
+calls are less variable:
 
 ```python
-response = llm.invoke("Hello there.")
-raw_text = response.content
+from typing import List
+
+from dotenv import load_dotenv
+from langchain_classic.output_parsers.boolean import BooleanOutputParser
+from langchain_classic.output_parsers.datetime import DatetimeOutputParser
+from langchain_classic.output_parsers import OutputFixingParser
+from langchain_core.exceptions import OutputParserException
+from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0.0,
+)
 ```
 
-Alternatively, a `StrOutputParser` can be used to transform the output cleanly.
+The examples below focus on the shape and type of each result. The exact text
+or facts returned by an LLM may differ between calls, even at temperature zero.
+
+### 2.1 Basic String Parsing
+
+Calling `.invoke()` on the chat model returns an `AIMessage`, which includes
+the generated content and response metadata:
+
+```python
+message = llm.invoke("hello")
+text = message.content
+```
+
+Accessing `.content` extracts the response text directly. A `StrOutputParser`
+performs the same transformation as a reusable LangChain runnable:
 
 ```python
 parser = StrOutputParser()
-text = parser.invoke(response)
+text = parser.invoke(llm.invoke("hello"))
 ```
 
 ### 2.2 Datetime Parsing
 
-A `DatetimeOutputParser` is used when you need to convert LLM output into a Python `datetime` object.
-The LLM is prompted to produce a date in a specific format.
+A `DatetimeOutputParser` converts a correctly formatted response into a Python
+`datetime` object. The prompt and parser must agree on the format:
 
 ```python
 parser = DatetimeOutputParser()
-datetime_obj = parser.invoke(response)
+message = llm.invoke(
+    "Output a random datetime in %Y-%m-%dT%H:%M:%S.%fZ. "
+    "Don't say anything else"
+)
+datetime_obj = parser.invoke(message)
 ```
+
+For example, the string `2023-10-05T14:23:45.123456Z` becomes
+`datetime.datetime(2023, 10, 5, 14, 23, 45, 123456)`. Extra prose or a
+different date format can cause parsing to fail.
 
 ### 2.3 Boolean Parsing
 
-A `BooleanOutputParser` converts "yes" or "no" responses into Python `True` or `False`.
-
-Example:
-
-Content: "yes" → `True`
-Content: "no" → `False`
+A `BooleanOutputParser` converts `YES` and `NO` responses into Python booleans.
+The restrictive prompt helps the model return a value the parser accepts:
 
 ```python
 parser = BooleanOutputParser()
-result = parser.invoke(AIMessage(content="yes"))
+is_ai = parser.invoke(llm.invoke("Are you an AI? YES or NO only"))
+is_human = parser.invoke(llm.invoke("Are you Human? YES or NO only"))
 ```
+
+In the exercise, these calls return `True` and `False`, respectively.
 
 ### 2.4 TypedDict Parsing
 
-LangChain supports using `TypedDict` to define the structure of expected output.
-
-```python
-class UserInfo(TypedDict):
-  name: str
-  country: str
-```
-
-When LangChain converts a `TypedDict` into a structured-output schema, it can
-also read field metadata stored with `Annotated`:
+`with_structured_output()` can use a `TypedDict` as the expected response
+schema. Field descriptions tell the model what to extract, while the defaults
+specify what to return when the input does not contain the requested details:
 
 ```python
 from typing_extensions import Annotated, TypedDict
 
 class UserInfo(TypedDict):
-  name: Annotated[str, "", "User's name. Defaults to ''"]
-  country: Annotated[str, "", "Where the user lives. Defaults to ''"]
+    """User's info."""
+
+    name: Annotated[str, "", "User's name. Defaults to ''"]
+    country: Annotated[str, "", "Where the user lives. Defaults to ''"]
+
+llm_with_structure = llm.with_structured_output(UserInfo)
 ```
 
 For this LangChain conversion, the values are interpreted positionally as:
@@ -140,75 +176,148 @@ structured-output schemas. Python's `Annotated` type only attaches arbitrary
 metadata to the underlying type; it does not define what that metadata means.
 Other libraries may interpret or ignore the metadata differently.
 
-Using `with_structured_output(UserInfo)`, the model is guided to format its response accordingly.
+The notebook demonstrates direct extraction, defaults, and inference:
 
-Examples:
+```python
+llm_with_structure.invoke(
+    "My name is Henrique, and I am from Brazil"
+)
+# {'name': 'Henrique', 'country': 'Brazil'}
 
-Input: "My name is Henrique and I am from Brazil." → `{ "name": "Henrique", "country": "Brazil" }`
+llm_with_structure.invoke("The sky is blue")
+# {'name': '', 'country': ''}
 
-If no relevant info is found, defaults are used.
+llm_with_structure.invoke(
+    "Hello, my name is the same as the capital of the U.S.  "
+    "But I'm from a country where we usually associate with kangaroos"
+)
+# {'name': 'Washington', 'country': 'Australia'}
+```
+
+The last result is inferred rather than copied from the input. Structured
+output controls the response shape; it does not restrict the model to literal
+extraction or guarantee factual correctness.
 
 ### 2.5 Pydantic Parsing
 
-For more robust parsing and validation, Pydantic models are used.
+Pydantic models add runtime construction and validation and return model
+instances with attribute access. `Field` descriptions become part of the
+schema presented to the model:
 
 ```python
-class UserInfo(BaseModel):
-  name: str
-  country: str
+from pydantic import BaseModel, Field
+
+class PydanticUserInfo(BaseModel):
+    """User's info."""
+
+    name: Annotated[
+        str,
+        Field(description="User's name. Defaults to ''", default=None),
+    ]
+    country: Annotated[
+        str,
+        Field(description="Where the user lives. Defaults to ''", default=None),
+    ]
+
+llm_with_structure = llm.with_structured_output(PydanticUserInfo)
 ```
 
-Pydantic models provide automatic type checking and better error handling.
+The return value is a `PydanticUserInfo` instance rather than a dictionary:
 
 ```python
-parsed = llm.with_structured_output(UserInfo).invoke("My name is Washington and I am from Australia.")
+structured_output = llm_with_structure.invoke("The sky is blue")
+# PydanticUserInfo(name='', country='')
+
+print(structured_output.name)
+print(structured_output.country)
 ```
 
-If the LLM output is properly structured, parsing succeeds.
-If missing information, fields default to empty strings or `None`, based on model configuration.
+The fields can be accessed as attributes. In the exercise, both are empty
+strings when the prompt contains no user information. The same capital and
+kangaroo prompt from the `TypedDict` example produces
+`PydanticUserInfo(name='Washington', country='Australia')`.
 
 ### 2.6 Parsing Complex Structures
 
-A more complex example is parsing a list of films (filmography) for an actor using a Pydantic model.
+A schema can contain collection fields. Here, `film_names` must be a list of
+strings:
 
 ```python
 class Performer(BaseModel):
-  name: str
-  film_names: List[str]
+    """Filmography info about an actor/actress."""
+
+    name: Annotated[str, Field(description="name of an actor/actress")]
+    film_names: Annotated[
+        List[str],
+        Field(description="list of names of films they starred in"),
+    ]
+
+llm_with_structure = llm.with_structured_output(Performer)
+response = llm_with_structure.invoke(
+    "Generate the filmography for Scarlett Johansson. Top 5 only"
+)
 ```
 
-Asking for "Scarlett Johansson filmography" returns the correct structured object with movie names.
+`response` is a validated `Performer` instance. It can be serialized as JSON:
+
+```python
+json_response = response.model_dump_json()
+```
+
+`PydanticOutputParser` handles the inverse operation by parsing a JSON string
+into a `Performer` instance:
+
+```python
+parser = PydanticOutputParser(pydantic_object=Performer)
+performer = parser.parse(json_response)
+```
+
+The schema verifies the result's shape and types, but it does not verify that
+the generated filmography is complete or accurate.
 
 ### 2.7 Handling Parsing Errors
 
-Sometimes the LLM outputs poorly formatted JSON or semi-structured text.
-If parsing fails (e.g., bad quotes, wrong format), an `OutputParserException` is raised.
+`PydanticOutputParser` expects valid JSON matching its Pydantic model. The
+exercise deliberately supplies a Python-style dictionary string with single
+quotes, which is not valid JSON:
 
 ```python
+misformatted_result = (
+    "{'name': 'Scarlett Johansson', "
+    "'film_names': ['The Avengers']}"
+)
+
 try:
-  parser.invoke(bad_output)
+    parser.parse(misformatted_result)
 except OutputParserException as e:
-  print("Parsing error caught!")
+    print(e)
 ```
+
+The parser raises `OutputParserException` and reports an invalid JSON output.
+Catch this exception at workflow boundaries so the application can retry,
+repair, or reject the response explicitly.
 
 ### 2.8 Fixing Misformatted Outputs Automatically
 
-LangChain provides an `OutputFixingParser`.
-
-This parser:
-
-- Detects format errors.
-- Attempts to reformat the output using the LLM itself.
+`OutputFixingParser` uses another LLM call to try to repair a response that the
+original parser rejected. It wraps the existing `PydanticOutputParser`:
 
 ```python
-fixing_parser = OutputFixingParser.from_llm(parser, llm)
-corrected_output = fixing_parser.invoke(misformatted_output)
+new_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
+corrected_output = new_parser.parse(misformatted_result)
 ```
 
-This enables parsing even from imperfect LLM outputs, making workflows much more reliable.
+In the exercise, this produces a valid `Performer` instance. However, the
+repairing model also adds film titles that were not present in the malformed
+input. An output-fixing parser can therefore change semantic content, not just
+punctuation or quoting. Validate important values after repair, and remember
+that this fallback incurs another model call.
 
 ### 2.9 Conclusion
 
-Structured output parsing transforms unstructured LLM responses into reliable Python objects.
-TypedDicts and Pydantic models improve structure and validation.
-Parsers combined with automatic fixing allow workflows to handle imperfect LLM behavior gracefully.
+Structured output parsing transforms model responses into predictable Python
+values. Simple parsers handle strings, datetimes, and booleans;
+`with_structured_output()` maps responses to `TypedDict` or Pydantic schemas;
+and `PydanticOutputParser` validates JSON against a model. Repair parsers can
+recover from malformed syntax, but their output still requires semantic and
+factual validation before it is trusted downstream.
