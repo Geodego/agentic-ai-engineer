@@ -8,6 +8,7 @@ workflows.
 
 - [01. Creating a Simple LangChain Application](notes/01-creating-a-simple-langchain-application.md)
 - [02. Structured Outputs](notes/02-structured-outputs.md)
+- [03. Multi-Step Worflows](notes/03-multi-step-worflows.md)
 
 ## Exercises
 
