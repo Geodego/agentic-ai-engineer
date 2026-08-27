@@ -13,6 +13,7 @@
     - [1.2.5 Composing Runnables](#125-composing-runnables)
     - [1.2.6 Turning Functions into Runnables](#126-turning-functions-into-runnables)
     - [1.2.7 Parallel Runnables](#127-parallel-runnables)
+    - [1.2.8 Passing Inputs Through Unchanged](#128-passing-inputs-through-unchanged)
   - [1.3 LCEL: The Declarative Approach to Chains](#13-lcel-the-declarative-approach-to-chains)
   - [1.4 Final Thoughts](#14-final-thoughts)
 
@@ -214,6 +215,61 @@ Its structure is also available through the graph inspection interface:
 ```python
 parallel_chain.get_graph().print_ascii()
 ```
+
+#### 1.2.8 Passing Inputs Through Unchanged
+
+`RunnablePassthrough` is an identity Runnable: it receives a value and returns
+that same value unchanged. Its purpose is to preserve an existing input while a
+composed workflow creates other values from it. It is particularly useful in a
+`RunnableParallel`, where one branch can retain the original input while other
+branches transform it.
+
+```python
+from langchain_core.runnables import (
+    RunnableLambda,
+    RunnableParallel,
+    RunnablePassthrough,
+)
+
+prepare_text = RunnableParallel(
+    original=RunnablePassthrough(),
+    uppercase=RunnableLambda(lambda text: text.upper()),
+)
+
+prepare_text.invoke("LangChain")
+# {"original": "LangChain", "uppercase": "LANGCHAIN"}
+```
+
+The passthrough does not select a field or unwrap a dictionary. For example,
+the `idea` branch below receives the entire input dictionary:
+
+```python
+result = {"output": "A business idea", "log": None}
+
+preserve_result = RunnableParallel(
+    idea=RunnablePassthrough(),
+)
+
+preserve_result.invoke(result)
+# {"idea": {"output": "A business idea", "log": None}}
+```
+
+When a later prompt needs only the `output` value, use an explicit
+transformation instead:
+
+```python
+prepare_idea = RunnableLambda(
+    lambda result: {"idea": result["output"]}
+)
+
+prepare_idea.invoke(result)
+# {"idea": "A business idea"}
+```
+
+At the beginning of a sequence, `RunnablePassthrough() | another_runnable`
+normally has the same data-flow effect as using `another_runnable` alone. Its
+main value is in branches or mappings where the unchanged input must remain
+available alongside transformed values.
 
 ### 1.3 LCEL: The Declarative Approach to Chains
 
