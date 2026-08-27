@@ -2,6 +2,7 @@
 
 ## Table of contents
 
+- [Related notebooks](#related-notebooks)
 - [1. `Multi-Step Worflows`](#1-multi-step-worflows)
   - [1.1 The Evolution from Chains to Runnables in LangChain](#11-the-evolution-from-chains-to-runnables-in-langchain)
   - [1.2 Runnables: The New Standard](#12-runnables-the-new-standard)
@@ -14,6 +15,13 @@
     - [1.2.7 Parallel Runnables](#127-parallel-runnables)
   - [1.3 LCEL: The Declarative Approach to Chains](#13-lcel-the-declarative-approach-to-chains)
   - [1.4 Final Thoughts](#14-final-thoughts)
+
+## Related notebooks
+
+- [Demo: LCEL and Runnables](../demos/03_LCEL.ipynb) — worked examples of composing and inspecting Runnables.
+- [Exercise: Multi-Step Workflow](../exercises/03_multi_step_workflow.ipynb) — build an AI business-advisor workflow using LCEL.
+
+Both notebooks contain cells that may call the OpenAI API and incur usage charges.
 
 ## 1. `Multi-Step Worflows`
 
